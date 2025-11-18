@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>Makro Image Checker v6.0.1</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="ตรวจสอบรูปภาพจาก Google Drive ว่าเป็นจัตุรัส (1:1) หรือสี่เหลี่ยมผืนผ้า">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>🖼️ Makro Image Checker <span class="version">v6.0</span></h1>
+    <p class="description">
+      อัปโหลดไฟล์ <strong>Makro Image.xlsx</strong> → ระบบจะตรวจสอบรูปภาพจาก Google Drive (คอลัมน์ F) 
+      และเติมผลลัพธ์ลงคอลัมน์ I<br>
+      <strong style="color: #16a34a;">Y</strong> = รูปจัตุรัส (ความกว้าง = ความสูง เช่น 500×500) | 
+      <strong style="color: #dc2626;">N</strong> = รูปสี่เหลี่ยมผืนผ้า (เช่น 800×600)
+    </p>
+
+    <div class="alert">
+      ✨ <strong>v6.0:</strong> ใช้ ExcelJS เพื่อรักษาฟอร์แมต สี สูตร และการจัดรูปแบบทั้งหมดจากไฟล์ต้นฉบับ
+    </div>
+
+    <div class="controls">
+      <input type="file" id="fileInput" accept=".xlsx,.xls">
+      <button id="downloadBtn" disabled>📥 ดาวน์โหลด Excel ที่เติม Y/N แล้ว</button>
+    </div>
+    <div id="status">ยังไม่ได้เลือกไฟล์</div>
+
+    <div class="progress-container" id="progressContainer">
+      <div class="progress-bar" id="progressBar">0%</div>
+    </div>
+
+    <div class="debug-console" id="debugConsole"></div>
+
+    <div class="tabs" id="sheetTabs"></div>
+    <div id="sheetContents"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

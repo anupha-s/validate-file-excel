@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>ตรวจสอบโครงสร้างไฟล์ Excel</title>
+  <style>
+    body {
+      font-family: 'Courier New', monospace;
+      padding: 20px;
+      background: #1e1e1e;
+      color: #d4d4d4;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: #252526;
+      padding: 20px;
+      border-radius: 8px;
+    }
+    h1 { color: #4ec9b0; margin-top: 0; }
+    h2 { color: #569cd6; margin-top: 20px; }
+    input[type="file"] {
+      padding: 10px;
+      background: #3c3c3c;
+      color: #d4d4d4;
+      border: 1px solid #555;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+    .info { 
+      background: #1e1e1e; 
+      padding: 15px; 
+      border-radius: 4px; 
+      margin: 10px 0;
+      border-left: 3px solid #4ec9b0;
+    }
+    .row-data {
+      background: #1e1e1e;
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 4px;
+      font-size: 12px;
+      overflow-x: auto;
+    }
+    .cell { 
+      display: inline-block; 
+      margin-right: 15px;
+      color: #ce9178;
+    }
+    .cell-header { color: #4ec9b0; font-weight: bold; }
+    .highlight { color: #dcdcaa; font-weight: bold; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0;
+      font-size: 11px;
+    }
+    th, td {
+      border: 1px solid #3c3c3c;
+      padding: 6px;
+      text-align: left;
+    }
+    th {
+      background: #3c3c3c;
+      color: #4ec9b0;
+      position: sticky;
+      top: 0;
+    }
+    .table-wrapper {
+      max-height: 400px;
+      overflow: auto;
+      border: 1px solid #3c3c3c;
+      border-radius: 4px;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>🔍 ตรวจสอบโครงสร้างไฟล์ Excel</h1>
+    <input type="file" id="fileInput" accept=".xlsx,.xls">
+    <div id="output"></div>
+  </div>
+
+  <script>
+    document.getElementById('fileInput').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        const data = new Uint8Array(evt.target.result);
+        const workbook = XLSX.read(data, { type: "array" });
+
+        let html = '';
+
+        // ข้อมูลทั่วไป
+        html += `<div class="info">`;
+        html += `<strong>ชื่อไฟล์:</strong> ${file.name}<br>`;
+        html += `<strong>ขนาด:</strong> ${(file.size / 1024 / 1024).toFixed(2)} MB<br>`;
+        html += `<strong>จำนวน Sheets:</strong> ${workbook.SheetNames.length}<br>`;
+        html += `<strong>Sheet Names:</strong> ${workbook.SheetNames.join(', ')}`;
+        html += `</div>`;
+
+        // วิเคราะห์แต่ละ sheet
+        workbook.SheetNames.forEach((sheetName, sheetIdx) => {
+          const sheet = workbook.Sheets[sheetName];
+          const range = XLSX.utils.decode_range(sheet['!ref']);
+          const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
+
+          html += `<h2>📄 Sheet: ${sheetName}</h2>`;
+          html += `<div class="info">`;
+          html += `<strong>Range:</strong> ${sheet['!ref']}<br>`;
+          html += `<strong>จำนวนแถว:</strong> ${rows.length}<br>`;
+          html += `<strong>จำนวนคอลัมน์:</strong> ${range.e.c + 1} (A-${XLSX.utils.encode_col(range.e.c)})<br>`;
+          html += `</div>`;
+
+          // แสดง 10 แถวแรก
+          html += `<h3>🔎 แถวที่ 1-10:</h3>`;
+          html += `<div class="table-wrapper"><table>`;
+          
+          // Header
+          html += `<thead><tr><th>Row</th>`;
+          for (let c = 0; c <= Math.min(range.e.c, 10); c++) {
+            html += `<th>${XLSX.utils.encode_col(c)}</th>`;
+          }
+          html += `</tr></thead><tbody>`;
+
+          // Data rows
+          for (let r = 0; r < Math.min(10, rows.length); r++) {
+            html += `<tr><td><strong>${r + 1}</strong></td>`;
+            for (let c = 0; c <= Math.min(range.e.c, 10); c++) {
+              const cellValue = rows[r][c] || "";
+              const displayValue = String(cellValue).substring(0, 50);
+              const isUrl = String(cellValue).includes("drive.google.com");
+              const style = isUrl ? 'color: #4ec9b0; font-weight: bold;' : '';
+              html += `<td style="${style}">${displayValue}</td>`;
+            }
+            html += `</tr>`;
+          }
+          html += `</tbody></table></div>`;
+
+          // หา Google Drive URLs
+          html += `<h3>🔗 Google Drive URLs ที่พบ (คอลัมน์ F):</h3>`;
+          let urlCount = 0;
+          let urlSamples = [];
+          
+          for (let r = 0; r < rows.length; r++) {
+            const cellF = rows[r][5]; // คอลัมน์ F = index 5
+            if (cellF && String(cellF).includes("drive.google.com")) {
+              urlCount++;
+              if (urlSamples.length < 5) {
+                urlSamples.push({ row: r + 1, url: String(cellF).substring(0, 80) });
+              }
+            }
+          }
+
+          html += `<div class="info">`;
+          html += `<strong>พบ URL ทั้งหมด:</strong> ${urlCount} รายการ<br><br>`;
+          if (urlSamples.length > 0) {
+            html += `<strong>ตัวอย่าง URLs:</strong><br>`;
+            urlSamples.forEach(item => {
+              html += `<div style="margin: 5px 0; padding: 5px; background: #1e1e1e; border-radius: 3px;">`;
+              html += `Row ${item.row}: <span class="highlight">${item.url}...</span>`;
+              html += `</div>`;
+            });
+          }
+          html += `</div>`;
+
+          // ตรวจสอบคอลัมน์ I
+          html += `<h3>📊 คอลัมน์ I (ปัจจุบัน):</h3>`;
+          let colISamples = [];
+          for (let r = 0; r < Math.min(10, rows.length); r++) {
+            const cellI = rows[r][8]; // คอลัมน์ I = index 8
+            colISamples.push({ row: r + 1, value: cellI || "(ว่าง)" });
+          }
+          
+          html += `<div class="info">`;
+          colISamples.forEach(item => {
+            html += `Row ${item.row}: <span class="highlight">${item.value}</span><br>`;
+          });
+          html += `</div>`;
+        });
+
+        document.getElementById('output').innerHTML = html;
+      };
+
+      reader.readAsArrayBuffer(file);
+    });
+  </script>
+</body>
+</html>
