@@ -277,6 +277,36 @@
       return `https://drive.google.com/thumbnail?id=${fileId}&sz=w400`;
     }
 
+    function detectImageTypeFromBlob(imgSrc, callback) {
+      fetch(imgSrc)
+        .then(response => response.blob())
+        .then(blob => {
+          const type = blob.type;
+          let fileType = 'unknown';
+          
+          if (type.includes('image/jpeg') || type.includes('image/jpg')) {
+            fileType = 'JPG';
+          } else if (type.includes('image/png')) {
+            fileType = 'PNG';
+          } else if (type.includes('image/gif')) {
+            fileType = 'GIF';
+          } else if (type.includes('image/webp')) {
+            fileType = 'WEBP';
+          } else if (type.includes('image/svg')) {
+            fileType = 'SVG';
+          } else if (type.includes('image/bmp')) {
+            fileType = 'BMP';
+          } else if (type.includes('image/')) {
+            fileType = type.split('/')[1].toUpperCase();
+          }
+          
+          callback(fileType);
+        })
+        .catch(() => {
+          callback('unknown');
+        });
+    }
+
     function loadImageDimensions(fileId, callback) {
       const img = new Image();
       img.crossOrigin = "anonymous";
@@ -288,10 +318,11 @@
       ];
       
       let urlIndex = 0;
+      let successUrl = null;
       
       function tryNextUrl() {
         if (urlIndex >= urls.length) {
-          callback(null, null, "โหลดไม่ได้");
+          callback(null, null, null, "โหลดไม่ได้");
           return;
         }
         
@@ -300,7 +331,11 @@
       }
       
       img.onload = () => {
-        callback(img.naturalWidth, img.naturalHeight, null);
+        successUrl = img.src;
+        // ตรวจสอบ file type จาก blob
+        detectImageTypeFromBlob(successUrl, (fileType) => {
+          callback(img.naturalWidth, img.naturalHeight, fileType, null);
+        });
       };
       
       img.onerror = () => {
@@ -415,8 +450,9 @@
                   <th>Product Header</th>
                   <th>Link</th>
                   <th>Preview</th>
+                  <th>File Type</th>
                   <th>ขนาด</th>
-                  <th>จัตุรัส?</th>
+                  <th>จัตุรัส ?</th>
                 </tr>
               </thead>
               <tbody id="tbody-${sheetName}"></tbody>
@@ -533,6 +569,7 @@
             <td style="font-size:0.75rem;">${colD}</td>
             <td><a href="${viewUrl}" target="_blank">เปิด</a></td>
             <td><img src="${thumbnailUrl}" alt="preview"></td>
+            <td class="filetype" style="font-size:0.75rem; color:#6b7280;"><span class="loading">...</span></td>
             <td class="size" style="font-size:0.75rem; color:#6b7280;"><span class="loading">กำลังตรวจสอบ...</span></td>
             <td class="result">
               <span class="badge badge-pending">รอ...</span>
@@ -542,13 +579,15 @@
 
           const resultCell = tr.querySelector(".result");
           const sizeCell = tr.querySelector(".size");
+          const fileTypeCell = tr.querySelector(".filetype");
 
           pendingCount++;
           updateStatus();
 
-          loadImageDimensions(fileId, (width, height, error) => {
+          loadImageDimensions(fileId, (width, height, fileType, error) => {
             if (error || !width || !height) {
               sizeCell.textContent = "โหลดไม่ได้";
+              fileTypeCell.textContent = "-";
               resultCell.innerHTML = `<span class="badge badge-error">ERROR</span>`;
               rowData.result = "ERROR";
               sheetStats[sheetName].error++;
@@ -558,6 +597,10 @@
               const flag = isSquare ? "Y" : "N";
 
               sizeCell.textContent = `${width}×${height}`;
+              fileTypeCell.textContent = fileType || 'unknown';
+              fileTypeCell.style.fontWeight = '600';
+              fileTypeCell.style.color = '#374151';
+              
               resultCell.innerHTML = `
                 <span class="badge ${isSquare ? "badge-y" : "badge-n"}">${flag}</span>
               `;
