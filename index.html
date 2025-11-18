@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Makro Image Checker for airin v1.1</title>
+  <link rel="icon" type="image/png" href="favicon.ico" id="favicon" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     * { box-sizing: border-box; }
@@ -11,6 +12,7 @@
       background: #f5f5f5;
       margin: 0;
       padding: 24px;
+      transition: background 0.3s ease;
     }
     .container {
       max-width: 1200px;
@@ -19,10 +21,64 @@
       border-radius: 12px;
       padding: 24px;
       box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+      position: relative;
+      transition: background 0.3s ease, box-shadow 0.3s ease;
     }
-    h1 { font-size: 1.6rem; margin: 0 0 8px; color: #111827; }
-    .version { font-size: 0.75rem; color: #6b7280; margin-left: 8px; }
-    p.description { margin-top: 0; color: #555; font-size: 0.95rem; line-height: 1.6; }
+    .header-wrapper {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+    h1 { font-size: 1.6rem; margin: 0; color: #111827; transition: color 0.3s ease; }
+    .version { font-size: 0.75rem; color: #6b7280; margin-left: 8px; transition: color 0.3s ease; }
+    p.description { margin-top: 0; color: #555; font-size: 0.95rem; line-height: 1.6; transition: color 0.3s ease; }
+    
+    .dark-mode-toggle {
+      background: #f3f4f6;
+      border: none;
+      border-radius: 999px;
+      width: 44px;
+      height: 44px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      transition: all 0.3s ease;
+      flex-shrink: 0;
+    }
+    .dark-mode-toggle:hover {
+      background: #e5e7eb;
+      transform: scale(1.05);
+    }
+    
+    /* Dark Mode Styles */
+    body.dark-mode {
+      background: #0f172a;
+    }
+    body.dark-mode .container {
+      background: #1e293b;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+    body.dark-mode h1 {
+      color: #f1f5f9;
+    }
+    body.dark-mode .version {
+      color: #94a3b8;
+    }
+    body.dark-mode p.description {
+      color: #e2e8f0;
+    }
+    body.dark-mode p.description strong {
+      color: #f1f5f9;
+    }
+    body.dark-mode .dark-mode-toggle {
+      background: #334155;
+    }
+    body.dark-mode .dark-mode-toggle:hover {
+      background: #475569;
+    }
     .alert {
       background: #dbeafe;
       border-left: 4px solid #3b82f6;
@@ -30,6 +86,11 @@
       margin: 16px 0;
       border-radius: 4px;
       font-size: 0.9rem;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+    body.dark-mode .alert {
+      background: #1e3a5f;
+      color: #bfdbfe;
     }
     .controls { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0; align-items: center; }
     input[type="file"] { padding: 8px 0; font-size: 0.9rem; }
@@ -46,6 +107,17 @@
     }
     button:disabled { background: #9ca3af; cursor: not-allowed; }
     button:not(:disabled):hover { background: #020617; transform: translateY(-1px); }
+    body.dark-mode button {
+      background: #3b82f6;
+      color: #ffffff;
+    }
+    body.dark-mode button:not(:disabled):hover {
+      background: #2563eb;
+    }
+    body.dark-mode button:disabled {
+      background: #475569;
+      color: #94a3b8;
+    }
     #status { 
       margin: 8px 0 16px; 
       font-size: 0.95rem; 
@@ -55,6 +127,12 @@
       background: #f9fafb;
       border-radius: 8px;
       border-left: 4px solid #3b82f6;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+    body.dark-mode #status {
+      background: #1e3a5f;
+      color: #f1f5f9;
+      border-left-color: #60a5fa;
     }
     .progress-container {
       margin: 12px 0;
@@ -64,6 +142,14 @@
       height: 24px;
       position: relative;
       display: none;
+      transition: background 0.3s ease;
+    }
+    body.dark-mode .progress-container {
+      background: #1e293b;
+    }
+    body.dark-mode .progress-bar {
+      background: linear-gradient(90deg, #2563eb, #1d4ed8);
+      color: #ffffff;
     }
     .progress-bar {
       height: 100%;
@@ -100,8 +186,8 @@
     .debug-info { color: #60a5fa; }
     .debug-warning { color: #fbbf24; }
     table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 0.85rem; }
-    thead { position: sticky; top: 0; background: #f9fafb; z-index: 1; }
-    th, td { border: 1px solid #e5e7eb; padding: 8px 6px; text-align: left; vertical-align: middle; }
+    thead { position: sticky; top: 0; background: #f9fafb; z-index: 1; transition: background 0.3s ease; }
+    th, td { border: 1px solid #e5e7eb; padding: 8px 6px; text-align: left; vertical-align: middle; transition: border-color 0.3s ease, color 0.3s ease; }
     th { font-weight: 600; font-size: 0.8rem; white-space: nowrap; color: #374151; }
     td img { display: block; max-height: 80px; max-width: 120px; object-fit: contain; border-radius: 4px; }
     .table-wrapper { 
@@ -111,6 +197,22 @@
       border-radius: 8px; 
       border: 1px solid #e5e7eb;
       background: #fff;
+      transition: background 0.3s ease, border-color 0.3s ease;
+    }
+    body.dark-mode thead {
+      background: #1e3a5f;
+    }
+    body.dark-mode th {
+      color: #f1f5f9;
+      font-weight: 700;
+    }
+    body.dark-mode th, body.dark-mode td {
+      border-color: #334155;
+      color: #e2e8f0;
+    }
+    body.dark-mode .table-wrapper {
+      background: #0f172a;
+      border-color: #334155;
     }
     .badge {
       display: inline-flex;
@@ -126,15 +228,26 @@
     .badge-n { background: #fee2e2; color: #b91c1c; }
     .badge-pending { background: #e5e7eb; color: #374151; }
     .badge-error { background: #fef3c7; color: #92400e; }
-    a { color: #2563eb; text-decoration: none; font-size: 0.75rem; }
+    body.dark-mode .badge-y { background: #166534; color: #dcfce7; }
+    body.dark-mode .badge-n { background: #b91c1c; color: #fee2e2; }
+    body.dark-mode .badge-pending { background: #475569; color: #e2e8f0; }
+    body.dark-mode .badge-error { background: #92400e; color: #fef3c7; }
+    a { color: #2563eb; text-decoration: none; font-size: 0.75rem; transition: color 0.3s ease; }
     a:hover { text-decoration: underline; }
+    body.dark-mode a { color: #60a5fa; }
+    body.dark-mode a:hover { color: #93c5fd; }
     .loading { color: #6b7280; font-style: italic; }
+    body.dark-mode .loading { color: #94a3b8; }
     .tabs {
       display: flex;
       gap: 4px;
       margin: 16px 0 0;
       border-bottom: 2px solid #e5e7eb;
       overflow-x: auto;
+      transition: border-color 0.3s ease;
+    }
+    body.dark-mode .tabs {
+      border-bottom-color: #475569;
     }
     .tab {
       padding: 10px 20px;
@@ -160,6 +273,19 @@
       color: #111827;
       border-bottom: 2px solid #3b82f6;
     }
+    body.dark-mode .tab {
+      background: #1e3a5f;
+      color: #cbd5e1;
+    }
+    body.dark-mode .tab:hover {
+      background: #2563eb;
+      color: #f1f5f9;
+    }
+    body.dark-mode .tab.active {
+      background: #0f172a;
+      color: #ffffff;
+      border-bottom-color: #60a5fa;
+    }
     .sheet-content {
       display: none;
     }
@@ -173,23 +299,51 @@
       margin: 8px 0;
       font-size: 0.85rem;
       color: #6b7280;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+    body.dark-mode .sheet-info {
+      background: #1e3a5f;
+      color: #cbd5e1;
+    }
+    body.dark-mode .sheet-info strong {
+      color: #f1f5f9;
+    }
+    body.dark-mode input[type="file"] {
+      color: #e2e8f0;
+    }
+    body.dark-mode input[type="file"]::file-selector-button {
+      background: #3b82f6;
+      color: #ffffff;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-right: 12px;
+    }
+    body.dark-mode input[type="file"]::file-selector-button:hover {
+      background: #2563eb;
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
 </head>
 <body>
   <div class="container">
-    <h1>🖼️ Makro Image Checker <span class="version">v1.1 (ExcelJS)</span></h1>
-    <p class="description">
+    <div class="header-wrapper">
+      <h1> <img src="icons8-cat-96.png" width="30px" height="30px" alt="คำอธิบายรูปภาพ" id="catIcon" />  Makro Image Checker <span class="version">v6.1</span></h1>
+      <button class="dark-mode-toggle" id="darkModeToggle" title="Toggle Dark Mode">
+        <span id="darkModeIcon">🌙</span>
+      </button>
+    </div>
+    <p class="description"></p>
       อัปโหลดไฟล์ <strong>Makro Image.xlsx</strong> → ระบบจะตรวจสอบรูปภาพจาก Google Drive (คอลัมน์ F) 
       และเติมผลลัพธ์ลงคอลัมน์ I<br>
       <strong style="color: #16a34a;">Y</strong> = รูปจัตุรัส (ความกว้าง = ความสูง เช่น 500×500) | 
       <strong style="color: #dc2626;">N</strong> = รูปสี่เหลี่ยมผืนผ้า (เช่น 800×600)
     </p>
 
-    <div class="alert">
+    <!-- <div class="alert">
       ✨ <strong>v6.0:</strong> ใช้ ExcelJS เพื่อรักษาฟอร์แมต สี สูตร และการจัดรูปแบบทั้งหมดจากไฟล์ต้นฉบับ
-    </div>
+    </div> -->
 
     <div class="controls">
       <input type="file" id="fileInput" accept=".xlsx,.xls">
@@ -213,6 +367,36 @@
   </div>
 
   <script>
+    // Dark Mode Toggle
+    const darkModeToggle = document.getElementById("darkModeToggle");
+    const darkModeIcon = document.getElementById("darkModeIcon");
+    const catIcon = document.getElementById("catIcon");
+    
+    // Function to update cat icon
+    function updateCatIcon(isDark) {
+      if (isDark) {
+        catIcon.src = 'icons8-cat-97.png';
+      } else {
+        catIcon.src = 'icons8-cat-96.png';
+      }
+    }
+    
+    // Load dark mode preference from localStorage
+    const isDarkMode = localStorage.getItem('darkMode') === 'true';
+    if (isDarkMode) {
+      document.body.classList.add('dark-mode');
+      darkModeIcon.textContent = '☀️';
+      updateCatIcon(true);
+    }
+    
+    darkModeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      const isDark = document.body.classList.contains('dark-mode');
+      darkModeIcon.textContent = isDark ? '☀️' : '🌙';
+      updateCatIcon(isDark);
+      localStorage.setItem('darkMode', isDark);
+    });
+
     const fileInput = document.getElementById("fileInput");
     const statusEl = document.getElementById("status");
     const sheetTabs = document.getElementById("sheetTabs");
