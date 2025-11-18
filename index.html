@@ -411,7 +411,8 @@
                 <tr>
                   <th>Row</th>
                   <th>SKU</th>
-                  <th>Product Name</th>
+                  <th>Product Code</th>
+                  <th>Product Header</th>
                   <th>Link</th>
                   <th>Preview</th>
                   <th>ขนาด</th>
@@ -506,12 +507,14 @@
 
           const colA = row.getCell(1).value || "";
           const colB = row.getCell(2).value || "";
+          const colD = row.getCell(4).value || "";
 
           const rowData = {
             sheetName,
             rowNumber,
             sku: colA,
             name: colB,
+            colD: colD,
             fileId,
             result: null,
             worksheet: worksheet
@@ -527,6 +530,7 @@
             <td>${rowNumber}</td>
             <td style="font-size:0.75rem;">${colA}</td>
             <td style="font-size:0.75rem;">${colB}</td>
+            <td style="font-size:0.75rem;">${colD}</td>
             <td><a href="${viewUrl}" target="_blank">เปิด</a></td>
             <td><img src="${thumbnailUrl}" alt="preview"></td>
             <td class="size" style="font-size:0.75rem; color:#6b7280;"><span class="loading">กำลังตรวจสอบ...</span></td>
