@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <title>Makro Image Checker for airin v1.1</title>
+  <title>Makro Image Checker for airin v1.2</title>
   <link rel="icon" type="image/png" href="favicon.ico" id="favicon" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
@@ -30,9 +30,14 @@
       align-items: flex-start;
       margin-bottom: 8px;
     }
-    h1 { font-size: 1.6rem; margin: 0; color: #111827; transition: color 0.3s ease; }
+    h1 { 
+      font-size: 1.6rem;
+      margin: 0;
+      color: #111827;
+      transition: color 0.3s ease;
+    }
     .version { font-size: 0.75rem; color: #6b7280; margin-left: 8px; transition: color 0.3s ease; }
-    p.description { margin-top: 0; color: #555; font-size: 0.95rem; line-height: 1.6; transition: color 0.3s ease; }
+    p.description { margin-top: 0; color: #374151; font-size: 0.95rem; line-height: 1.6; transition: color 0.3s ease; }
     
     .dark-mode-toggle {
       background: #f3f4f6;
@@ -68,10 +73,10 @@
       color: #94a3b8;
     }
     body.dark-mode p.description {
-      color: #e2e8f0;
+      color: #f1f5f9 !important;
     }
     body.dark-mode p.description strong {
-      color: #f1f5f9;
+      color: #ffffff !important;
     }
     body.dark-mode .dark-mode-toggle {
       background: #334155;
@@ -232,6 +237,11 @@
     body.dark-mode .badge-n { background: #b91c1c; color: #fee2e2; }
     body.dark-mode .badge-pending { background: #475569; color: #e2e8f0; }
     body.dark-mode .badge-error { background: #92400e; color: #fef3c7; }
+    
+    .badge-y-text { color: #16a34a; font-weight: 700; transition: color 0.3s ease; }
+    .badge-n-text { color: #dc2626; font-weight: 700; transition: color 0.3s ease; }
+    body.dark-mode .badge-y-text { color: #4ade80; }
+    body.dark-mode .badge-n-text { color: #f87171; }
     a { color: #2563eb; text-decoration: none; font-size: 0.75rem; transition: color 0.3s ease; }
     a:hover { text-decoration: underline; }
     body.dark-mode a { color: #60a5fa; }
@@ -329,16 +339,16 @@
 <body>
   <div class="container">
     <div class="header-wrapper">
-      <h1> <img src="icons8-cat-96.png" width="30px" height="30px" alt="คำอธิบายรูปภาพ" id="catIcon" />  Makro Image Checker <span class="version">v6.1</span></h1>
+      <h1> <img src="icons8-cat-96.png" width="30px" height="30px" alt="คำอธิบายรูปภาพ" id="catIcon" />  Makro Image Checker <span class="version">v6.2</span></h1>
       <button class="dark-mode-toggle" id="darkModeToggle" title="Toggle Dark Mode">
         <span id="darkModeIcon">🌙</span>
       </button>
     </div>
-    <p class="description"></p>
+    <p class="description">
       อัปโหลดไฟล์ <strong>Makro Image.xlsx</strong> → ระบบจะตรวจสอบรูปภาพจาก Google Drive (คอลัมน์ F) 
       และเติมผลลัพธ์ลงคอลัมน์ I<br>
-      <strong style="color: #16a34a;">Y</strong> = รูปจัตุรัส (ความกว้าง = ความสูง เช่น 500×500) | 
-      <strong style="color: #dc2626;">N</strong> = รูปสี่เหลี่ยมผืนผ้า (เช่น 800×600)
+      <strong class="badge-y-text">Y</strong> = รูปจัตุรัส (ความกว้าง = ความสูง เช่น 500×500) | 
+      <strong class="badge-n-text">N</strong> = รูปสี่เหลี่ยมผืนผ้า (เช่น 800×600)
     </p>
 
     <!-- <div class="alert">
